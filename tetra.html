@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetraedros en el Hiperespacio</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to right, #e0f7fa, #ffebee); /* Fondo claro con degradado */
+            perspective: 1000px;
+        }
+        .tetraedro {
+            position: absolute;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+            animation: viajar 5s linear infinite;
+        }
+        .triangulo {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 86.6px solid yellow; /* Color del tetraedro */
+            transform-origin: 50% 50%;
+        }
+        @keyframes viajar {
+            0% {
+                transform: translateZ(0) translateY(0) translateX(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+            }
+            100% {
+                transform: translateZ(-800px) translateY(-400px) translateX(-400px) rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    const numTetraedros = 20;
+
+    function crearTetraedro() {
+        const tetraedro = document.createElement('div');
+        tetraedro.className = 'tetraedro';
+
+        for (let i = 0; i < 4; i++) {
+            const triangulo = document.createElement('div');
+            triangulo.className = 'triangulo';
+            tetraedro.appendChild(triangulo);
+        }
+
+        document.body.appendChild(tetraedro);
+
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+
+        tetraedro.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+
+        const triángulos = tetraedro.children;
+        triángulos[0].style.transform = 'rotateY(0deg) translateZ(43.3px)';
+        triángulos[1].style.transform = 'rotateY(120deg) translateZ(43.3px)';
+        triángulos[2].style.transform = 'rotateY(240deg) translateZ(43.3px)';
+        triángulos[3].style.transform = 'rotateX(90deg) translateZ(43.3px)';
+    }
+
+    for (let i = 0; i < numTetraedros; i++) {
+        crearTetraedro();
+    }
+</script>
+
+</body>
+</html>

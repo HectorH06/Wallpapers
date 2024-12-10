@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hex</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+            perspective: 1000px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scene {
+            width: 100vw;
+            height: 100vh;
+            perspective: 1500px;
+            position: relative;
+        }
+
+        .cube {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            transform-style: preserve-3d;
+            animation: spin 5s infinite linear, move 10s linear forwards;
+        }
+
+        .cube div {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            box-sizing: border-box;
+            opacity: 0.5;
+        }
+
+        .cube div:nth-child(1) { transform: rotateY(  0deg) translateZ(25px); }
+        .cube div:nth-child(2) { transform: rotateY( 90deg) translateZ(25px); }
+        .cube div:nth-child(3) { transform: rotateY(180deg) translateZ(25px); }
+        .cube div:nth-child(4) { transform: rotateY(-90deg) translateZ(25px); }
+        .cube div:nth-child(5) { transform: rotateX( 90deg) translateZ(25px); }
+        .cube div:nth-child(6) { transform: rotateX(-90deg) translateZ(25px); }
+
+        .inner-cube {
+            width: 30px;
+            height: 30px;
+            transform-style: preserve-3d;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            animation: spin-inner 3s infinite linear reverse;
+        }
+
+        .inner-cube div {
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+        }
+
+        .inner-cube div:nth-child(1) { transform: rotateY(  0deg) translateZ(15px); }
+        .inner-cube div:nth-child(2) { transform: rotateY( 90deg) translateZ(15px); }
+        .inner-cube div:nth-child(3) { transform: rotateY(180deg) translateZ(15px); }
+        .inner-cube div:nth-child(4) { transform: rotateY(-90deg) translateZ(15px); }
+        .inner-cube div:nth-child(5) { transform: rotateX( 90deg) translateZ(15px); }
+        .inner-cube div:nth-child(6) { transform: rotateX(-90deg) translateZ(15px); }
+
+        @keyframes spin {
+            from { transform: rotateX(0deg) rotateY(0deg); }
+            to { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        @keyframes spin-inner {
+            from { transform: rotateX(0deg) rotateY(0deg); }
+            to { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        @keyframes move {
+            from { transform: translate(0, 0) rotateX(45deg) rotateY(45deg); }
+            to { transform: translate(calc(100vw * var(--x-dir)), calc(100vh * var(--y-dir))) rotateX(405deg) rotateY(405deg); }
+        }
+
+        @keyframes explode {
+            to {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: currentColor;
+            opacity: 0.9;
+            transform-origin: center;
+        }
+
+        @keyframes particle-explosion {
+            to {
+                transform: translate(var(--dx), var(--dy)) scale(0.1);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scene"></div>
+    <script>
+        const scene = document.querySelector('.scene');
+
+        function getRandomColor() {
+            const hue = Math.random() * 360;
+            const saturation = 80 + Math.random() * 20;
+            const lightness = 50 + Math.random() * 10;
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        function createParticles(cube, color) {
+            const particles = [];
+            const numParticles = 20;
+            const cubeRect = cube.getBoundingClientRect();
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${cubeRect.left + cubeRect.width / 2}px`;
+                particle.style.top = `${cubeRect.top + cubeRect.height / 2}px`;
+                particle.style.backgroundColor = color;
+                particle.style.setProperty('--dx', `${(Math.random() - 0.5) * 100}px`);
+                particle.style.setProperty('--dy', `${(Math.random() - 0.5) * 100}px`);
+                particle.style.animation = `particle-explosion 0.5s forwards`;
+                scene.appendChild(particle);
+                particles.push(particle);
+            }
+            setTimeout(() => {
+                particles.forEach(p => p.remove());
+            }, 500);
+        }
+
+        function createCube() {
+            const cube = document.createElement('div');
+            cube.className = 'cube';
+
+            const color = getRandomColor();
+            
+            for (let i = 0; i < 6; i++) {
+                const face = document.createElement('div');
+                face.style.background = color;
+                face.style.border = `2px solid ${color}`;
+                cube.appendChild(face);
+            }
+
+            const innerCube = document.createElement('div');
+            innerCube.className = 'inner-cube';
+
+            const innerColor = getRandomColor();
+
+            for (let i = 0; i < 6; i++) {
+                const innerFace = document.createElement('div');
+                innerFace.style.background = innerColor;
+                innerFace.style.border = `2px solid ${innerColor}`;
+                innerCube.appendChild(innerFace);
+            }
+
+            cube.appendChild(innerCube);
+            scene.appendChild(cube);
+
+            const xDir = Math.random() * 2 - 1;
+            const yDir = Math.random() * 2 - 1;
+
+            cube.style.setProperty('--x-dir', xDir);
+            cube.style.setProperty('--y-dir', yDir);
+
+            const initialX = Math.random() * 100 + 'vw';
+            const initialY = Math.random() * 100 + 'vh';
+
+            cube.style.left = initialX;
+            cube.style.top = initialY;
+
+            const spinDuration = Math.random() * 3 + 2 + 's';
+            const moveDuration = Math.random() * 5 + 7 + 's';
+            cube.style.animationDuration = `${spinDuration}, ${moveDuration}`;
+
+            setTimeout(() => {
+                cube.style.animation = `explode 0.5s forwards`;
+                setTimeout(() => {
+                    createParticles(cube, color);
+                    cube.remove();
+                }, 500);
+            }, parseFloat(moveDuration) * 1000);
+        }
+
+        function startGeneratingCubes() {
+            setInterval(createCube, 200); // Genera un nuevo cubo cada 200ms
+        }
+
+        startGeneratingCubes();
+    </script>
+</body>
+</html>
